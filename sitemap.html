@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Urban Analytics Data Infrastructure Portal (Beta)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="CSS/style.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="ie.css" /><![endif]-->
+<script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.cycle.all.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+<script type="text/javascript" src="js/portal/config.js"></script>
+<script type="text/javascript" src="js/portal/ajax.js"></script>
+
+<script type="text/javascript">
+
+function createMostVisitedIndicatorContent()
+{
+	var mostVisitedBox = document.getElementById("mostVisitedBox");
+	mostVisitedBox.innerHTML += "<h2>Most visited indicators</h2>";
+	
+	var configs = new configurationSettings();
+	createXMLHttpRequest(configs.portal_list_top5_most_visited_indicators, function(response) 
+	{
+		//alert(JSON.stringify(response));
+		var indicators = response.indicators_list;
+		//alert(indicators.length);
+		
+		var mainUL = document.createElement("ul");
+		mainUL.className  = "popular";
+		
+		
+		for (var i=0; i< indicators.length; i++)
+		{
+			var tmp_indicator = indicators[i];
+			var tmp_li = document.createElement("li");
+			mainUL.appendChild(tmp_li);
+			
+			var tmp_a = document.createElement("a");
+			tmp_a.title = tmp_indicator.jobname;
+			tmp_a.href = configs.indicatordetailsPage + "?uuid=" + tmp_indicator.uuid;
+			tmp_a.appendChild(document.createTextNode(tmp_indicator.jobname));
+			tmp_li.appendChild(tmp_a);
+			
+			var tmp_p = document.createElement("p");
+			tmp_li.appendChild(tmp_p);
+			
+			tmp_p.appendChild(document.createTextNode("by " + 
+				tmp_indicator.organisation_name + " | for " + 
+				tmp_indicator.geoclass.label));
+		}
+		
+		mostVisitedBox.appendChild(mainUL);
+		
+	}, function(status) {
+	//do something here if the request was un-successful!
+	});
+	
+}
+
+
+function clearTextBox(textbox)
+	{
+		textbox.value = '';
+		textbox.style.color = "#000000";
+	}
+
+	function submitSearch()
+	{
+		var searchBox = document.getElementById("searchBox");
+		window.location = "search-results.html?k=" + encodeURIComponent(searchBox.value);
+	}
+	
+	function handle(e){
+        if(e.keyCode === 13){
+            e.preventDefault(); // Ensure it is only this code that rusn
+			submitSearch()
+        }
+    }
+	
+	
+	
+	
+	
+	function showListOfThemes()
+{
+	
+	var container = document.getElementById("bbithemes");
+	container.innerHTML = "";
+	container.innerHTML += "<h2>BROWSE INDICATORS BY THEMES</h2>";
+	
+	var configs = new configurationSettings();
+	createXMLHttpRequest(configs.portal_list_themes_with_indicatorCount
+	+ "?onturi=" + "http://csdila.unimelb.edu.au/ontologies/f/ThematicClasses.owl" + 		"&conuri=Theme&ontformat=RDF/XML&namespace=http://csdila.unimelb.edu.au/ontologies/indicatortheme%23" + 
+	"&includeSubClasses=1&withreasoning=1" , function(response) 
+	{
+	//do your things here if the request was successful!
+	//alert(JSON.stringify(response));
+		var outputs = response.outputs;
+		//alert(JSON.stringify(response));
+		var top_themes = Object.keys(outputs);
+		
+		
+		
+		if (top_themes.length > 0)
+		{
+			for (var i = 0; i< top_themes.length; i++)
+			{
+				var topThemeString = top_themes[i].toString().split('#')[1];
+				//alert(topThemeString);
+				var current_top_theme_array = outputs[top_themes[i]];
+				
+				var ul_container = document.createElement("ul");
+				var li_topTier_theme_tmp = document.createElement("li");
+				var li_b_tmp = document.createElement("b");
+				var li_b_tmp_linkText = document.createTextNode(topThemeString);
+				li_b_tmp.appendChild(li_b_tmp_linkText);
+				
+				li_topTier_theme_tmp.appendChild(li_b_tmp);
+				
+				ul_container.appendChild(li_topTier_theme_tmp);
+				container.appendChild(ul_container);
+				//alert(current_top_theme_array.length);
+				
+				var ul_container2 = document.createElement("ul");
+				ul_container.appendChild(ul_container2);
+				for (var j = 0; j< current_top_theme_array.length; j++)
+				{
+					//alert(current_top_theme_array[j].label);
+					
+					
+					
+				var li_theme_tmp = document.createElement("li");
+				var li_a_tmp = document.createElement("a");
+				var li_a_tmp_linkText = document.createTextNode(current_top_theme_array[j].label);
+				li_a_tmp.appendChild(li_a_tmp_linkText);
+				li_a_tmp.title = current_top_theme_array[j].label;
+				var href = configs.browseByThemeDetails + "?n=" + current_top_theme_array[j].label + "&themeOntId=" + current_top_theme_array[j].ontid + "&themeclassuri=" + encodeURIComponent(current_top_theme_array[j].namespace + current_top_theme_array[j].instance);
+				
+				li_a_tmp.href = href;
+				li_theme_tmp.appendChild(li_a_tmp);
+				li_theme_tmp.appendChild(document.createTextNode(" (" + current_top_theme_array[j].indicator_count + ")")); 
+				
+				ul_container2.appendChild(li_theme_tmp);
+				}
+				
+			}
+		}
+		else
+		{
+			var p = document.createElement("p");
+			p.style.color = "red";
+			p.appendChild(document.createTextNode("No themes exist in the infrastructure!"));
+			container.appendChild(p);
+		}
+		
+		
+		
+		
+		
+	}, function(status) {
+	//do something here if the request was un-successful!
+	alert("!");
+});
+	
+}	
+</script>
+</head>
+<body onload="javascript:createMostVisitedIndicatorContent();showListOfThemes();">
+<!-- BEGIN wrapper -->
+<div id="wrapper">
+  <!-- BEGIN header -->
+  <div id="header">
+    
+    <table width="100%" border="0" style="margin-top: 15px;">
+  <tbody>
+    <tr>
+      <td>
+       <h1 class="children" style="font-size: 30px;">Urban Analytics Infrastructure <span style="color:rgba(255,158,0,1.00)">Portal</span></h1>
+      <p style="margin-bottom:25px; text-transform:none">A Digital Infrastructure for exploring urban quality of life indicators </p>
+      
+      </td>
+      <td valign="top" align="center"><br />
+        <a href="sitemap.html" style="text-decoration:none">Sitemap</a> &nbsp; | &nbsp; <a href="http://apps.csdila.ie.unimelb.edu.au/uadi/" style="text-decoration:none" target="_blank">Login</a></td>
+    </tr>
+  </tbody>
+</table>
+    
+    <div width="100%"  style="height: 200px; margin-top: 15px;"><img src="images/banner.png" width="980" height="200" alt=""/></div>
+    <!-- begin pages -->
+    <ul class="pages">
+      <!-- begin logo -->
+   
+    
+
+     
+    <!-- end pages -->
+    
+    <!-- end logo -->
+    </ul>
+    <!-- end pages -->
+   
+    <div class="break"></div>
+    
+    <!-- begin sponsor -->
+    <div class="sponsor"> <a href="#"></a> </div>
+    <!-- end sponsor -->
+    <!-- begin categories -->
+    <ul class="categories">
+      <li><a href="index.html" style="background-color: #003366; color: #FFFFFF;">HOME</a></li>
+      <li><a href="about.html">ABOUT UADI</a></li>
+      <li><a href="browse.html">BROWSE INDICATORS	</a></li>
+      <li><a href="r-team.html">RESEARCH TEAM</a></li>
+      <li><a href="partners.html">PARTNERS</a></li>
+      <li><a href="links.html">LINKS</a></li>
+    </ul>
+    <!-- end categories -->
+    
+    <div style="height:250px;">
+    <table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td align="center"><p><br />
+        <br />
+        <br />
+        <span style="font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif; font-size:28px; font-weight:400">Explore Urban Quality of Life Indicators </span><br />
+        
+        <span style="font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif; font-size:18px; color:rgba(179,177,177,1.00)">Free and open access to urban quality of life indicators for Australian cities</span>
+      </p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>
+          <input name="textfield" type="text" onfocus="javascript: clearTextBox(this);" onkeydown="handle(event);" id="searchBox" style="height: 40px; color:rgba(180,173,173,1.00)" value="  Search indicators e.g. Green areas per 100,000 population OR Perth accessibility to jobs" size="100" />
+        </p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>Browse indicators by <strong><a href="browse-alphabetic.html" style="text-decoration:none">Name</a></strong></a>, <strong><a href="browse-by-Year.html" style="text-decoration:none">Year</a></strong></a>, <strong><a href="browse-by-theme.html" style="text-decoration:none">Theme</a></strong> or <strong><a href="browse-geographic.html" style="text-decoration:none">Geographic Boundary</a></strong></p></td>
+    </tr>
+  </tbody>
+</table>
+
+    
+    </div>
+    
+  </div>
+  <!-- END header -->
+  
+  <div id="content">
+    <!-- begin recent posts -->
+    <div class="recent">
+      <!-- begin post -->
+      <div class="single">
+        <h2>UAI Portal Sitemap</h2>
+        <p>The UAI Portal is a connected web of different pages. The following presents this web in a hierarchical way. Please selet a page to navigate to:</p>
+        <p>&nbsp;</p>
+        <ul>
+          <li><a href="index.html"><strong>Home</strong></a>          </li>
+          <li><a href="about.html"><strong>About UADI</strong></a></li>
+          <li><a href="browse.html"><strong>Browse Indicators
+          </strong></a></li>
+          <ul>
+            <ul>
+              <li><a href="browse-alphabetic.html">By name</a></li>
+              <li><a href="browse-by-Year.html">By  year</a></li>
+              <li><a href="browse-by-theme.html">By theme</a></li>
+              <li><a href="browse-geographic.html">By geographic boundary</a></li>
+            </ul>
+          </ul>
+          <li><a href="r-team.html"><strong>Research Team</strong></a></li>
+          <li><a href="partners.html"><strong>Our Partners</strong></a></li>
+          <li><a href="links.html"><strong>External Links</strong></a></li>
+          <li><strong>Follow us on Social Media
+          </strong></li>
+          <ul>
+            <ul>
+              <li>Twitter</li>
+              <li><a href="https://www.facebook.com/Urban-Analytics-Infrastructure-1983766481858163/" target="_blank">Facebook</a></li>
+            </ul>
+          </ul>
+          <li><strong>Follow us using RSS feeds
+          </strong></li>
+          <ul>
+          </ul>
+        </ul>
+        <p>
+          &nbsp;
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+        </div>
+      <!-- end post -->
+    </div>
+    <!-- end recent posts -->
+  </div>
+  
+
+
+
+  <!-- BEGIN sidebar -->
+  <div id="sidebar">
+  <!-- begin tag cloud -->
+    <div class="box">
+      <h2>Tag Cloud</h2>
+      <div class="tags"></div>
+    <img src="images/tagcloudexample.PNG" width="310" height="176" alt=""/>
+    </div>
+    <!-- end tag cloud -->
+    
+    <!-- begin popular posts -->
+        <div class="box" id="mostVisitedBox">
+      
+      
+    </div>
+    
+     <!-- begin categories -->
+      <div class="box" id="bbithemes">
+        
+      </div>
+      <!-- end categories -->
+      
+      <!-- begin sponsors -->
+    <div class="box">
+      
+      <ul class="bookmarks">
+        
+        <li class="twt"><a href="#">Follow us on Twitter</a></li>
+        <li class="fcb"><a href="https://www.facebook.com/Urban-Analytics-Infrastructure-1983766481858163/" target="_blank">Follow us on Facebook</a></li>
+      </ul>
+    </div>
+    <!-- end sponsors -->
+    
+      
+    <!-- end popular posts -->
+    <!-- begin flickr images -->
+    <div class="box">
+      <h2>PROJECT PARTNERS</h2>
+      <div class="flickr" style="height: 280px;">
+        <div style="float:left"><img src="images/uni-logos/arc_stacked.png" width="50" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/uom-logo.png" width="60" alt="" style="padding: 5px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UNSW_coat_of_arms.png" width="60" alt="" style="padding: 5px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UQ.png" width="60" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UOWol.png" width="60" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/University_of_Canberra.svg.png" width="60" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UWA_Logo.png" width="60" alt="" style="padding: 10px;"/></div>
+      </div>
+    </div>
+    <!-- end flickr images --> 
+    
+    
+    
+  </div>
+  <!-- END sidebar -->
+  
+  
+</div>
+<!-- END wrapper -->
+
+
+
+
+
+<!-- BEGIN footer -->
+<div id="footer">
+  <p class="l">Copyright &copy; 2017 - <strong>Urban Analytics Infrastructure (Beta version) </strong> &middot; All Rights Reserved.</p>
+</div>
+<!-- END footer -->
+</body>
+</html>

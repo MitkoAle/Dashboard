@@ -1,0 +1,1109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Urban Analytics Data Infrastructure Portal (Beta)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="CSS/style.css" />
+<link rel="stylesheet" type="text/css" href="CSS/layerSwitcher.css"/>
+<link rel="stylesheet" type="text/css" href="CSS/ol.css"/>
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="ie.css" /><![endif]-->
+<script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.cycle.all.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+<script src="http://openlayers.org/api/OpenLayers.js"></script>
+<script src="https://openlayers.org/en/v4.1.1/build/ol.js"></script>
+<script type="text/javascript" src="js/ol3.js"></script>
+
+<script type="text/javascript" src="js/portal/config.js"></script>
+<script type="text/javascript" src="js/portal/ajax.js"></script>
+
+
+    <script type="text/javascript" src="js/extjs/ext-all-debug.js"></script>
+	<script type="text/javascript" src="js/extjs/examples.js"></script>
+
+
+<script type="text/javascript">
+
+var hasUserVoted = false;
+var configs = new configurationSettings();
+var indicator_uuid = getParameterByName("uuid");
+
+var comment_form_name;
+var comment_form_org;
+var comment_form_email;
+var comment_form_conent;
+var inputsToDownload = [];
+
+var no_visits = null;
+var no_ratevote = null;
+var totalRateVal = null;
+
+function initialisePage() 
+{	
+	
+	var rank_star_1 = document.getElementById("rank_star_1");
+	var rank_star_2 = document.getElementById("rank_star_2");
+	var rank_star_3 = document.getElementById("rank_star_3");
+	var rank_star_4 = document.getElementById("rank_star_4");
+	var rank_star_5 = document.getElementById("rank_star_5");
+	
+	comment_form_name = document.getElementById("comment_name");
+	comment_form_org = document.getElementById("comment_organisationName");
+	comment_form_email = document.getElementById("comment_email");
+	comment_form_conent = document.getElementById("comment_content");
+	
+	
+	
+	// increment the number of visits of this indicator
+	
+	
+	createXMLHttpRequest(configs.portal_increment_indicator_visit + "?indicatoruuid=" + indicator_uuid, function(response) 
+		{ }, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+	
+	
+	createXMLHttpRequest(configs.portal_getIndicatorInfo + "?indicatoruuid=" + indicator_uuid, function(response) 
+		{
+			var indicator = response.indicator_details;
+			//console.log(JSON.stringify(indicator));
+	
+			var publisher_id = indicator. publisher_id;
+			totalRateVal = indicator.ttl_ratevalue;
+			var geoClass = indicator.indicator_geoclass;
+			var keywords = indicator.keywords;
+			var indicator_name = indicator.indicator_name;
+			var themes = indicator.indicator_thematicclass;
+			var thumbnail = indicator.thumbnail_url;
+			var publisher_org = indicator.publisher_organisation;
+			no_visits = indicator.no_visits;
+			no_ratevote = indicator.no_ratevote;
+			var indicator_outputs = indicator.indicator_outputs;
+			var creationDate = indicator.creation_datetime;
+			var indId = indicator.id;
+			var description = indicator.indicator_description;
+			var status = indicator.status;
+			
+			
+			
+			var titleElement = document.getElementById("indicator_title");
+			titleElement.appendChild(document.createTextNode(indicator_name));
+			
+			var dateElement = document.getElementById("indicator_date");
+			dateElement.appendChild(document.createTextNode(getHumanReadableDateFromYYMMDD(creationDate)));
+			
+			var ThumbnailImageElement = document.getElementById("indicator_thumbnail");
+			ThumbnailImageElement.src = thumbnail;
+			
+			var abstractElement = document.getElementById("indicator_abstract");
+			abstractElement.appendChild(document.createTextNode(description));
+				
+			
+			var publisherElement = document.getElementById("indicator_publisher");
+			publisherElement.innerHTML = "<a href=\"" + configs.browseByPublisherPage + "?publisherid=" + publisher_id + "&publishername=" + publisher_org + "\">" + publisher_org + "</a>";
+			
+			var geoElement = document.getElementById("indicator_geo");
+			var geoLink = document.createElement("a");
+			if (geoClass != null)
+				{
+					geoLink.href = configs.browseByGeoDetails + "?ontid=" + geoClass.ontid + "&conuri=" + 
+							encodeURIComponent(geoClass.concepturi) + "&instanceuri=" + encodeURIComponent(geoClass.instanceuri) + "&boundaryName=" + geoClass.label;
+					if (geoClass.label != null)
+					{
+						var tmp_geo_lnk = document.createTextNode(geoClass.label);
+						geoLink.appendChild(tmp_geo_lnk);
+					
+					}	
+				}
+			
+			geoElement.appendChild(geoLink);
+			
+			
+			
+			var themesElement = document.getElementById("indicator_themes");
+			if (themes != null)
+				{
+					if (themes.length > 0)
+					{
+						
+						for (var j = 0; j < themes.length; j++)
+						{
+							var themeLabel = themes[j].label;
+							var themeUrl = configs.browseByThemeDetails + "?n=" + themes[j].label + "&themeOntId=" + themes[j].ontid + "&themeclassuri=" + encodeURIComponent(themes[j].instanceuri);
+							
+							var themeLink = document.createElement("a");
+							themeLink.title = themeLabel;
+							themeLink.href = themeUrl;
+							var tmp_theme_lnk1 = document.createTextNode(themeLabel);
+							themeLink.appendChild(tmp_theme_lnk1);
+							themesElement.appendChild(themeLink);
+							
+							if (j < themes.length - 1)
+							{
+								themesElement.appendChild(document.createTextNode(", "));
+							}
+						}
+					}
+				}
+				
+			
+			
+			
+			
+			var inputs_metadata_container = document.getElementById("indicator_input_metadata_container");
+			
+			
+			
+			
+		}, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+	
+	
+	createXMLHttpRequest(configs.portal_getIndicatorInputsMetadata + "?indicatoruuid=" + indicator_uuid, function(response) 
+		{
+			var inputs_metadata_container = document.getElementById("indicator_input_metadata_container");
+			var inputs = response.inputs_list;
+			
+			
+			var input_i_html = "The followings are the inputs of the tool that was used to derive the indicator. You can download the metadata or - if the permission is provided - the data itself for further explortation: <br /><br />";
+			for (var i=0; i< inputs.length; i++)
+			{
+				var tmp_input = inputs[i];
+				
+				var input_name = tmp_input.input.input_name;
+				var input_type = tmp_input.input.input_type;
+				var input_abstract = tmp_input.input.input_abstract;
+				var input_input_details = tmp_input.input["user-input-details"];
+				
+				inputsToDownload.push(JSON.stringify(input_input_details));
+				input_i_html += "<table width=\"100%\" border=\"0\"><tbody><tr><td width=\"19%\" height=\"36\"><strong>";
+				input_i_html += "Input " + (i+1) + "</strong></td>";
+				input_i_html += "<td width=\"81%\">&nbsp;</td></tr><tr><td>Input name: </td>";
+				input_i_html += "<td>" + input_name + " (" + input_type + ") </td></tr>";
+				input_i_html += "<tr><td>Input Description: </td><td>" + input_abstract + "</td></tr><tr><td>Input details:</td><td id=\"download_elem_" + i + "\"><a href=\"#\" onclick=\"javascript:downloadAsFile('" + input_name + "_metadata.txt', inputsToDownload[" + i + "], this);\">Download details</a>";
+				
+				if (input_type == "datalayer" || input_type == "datafile")
+				{
+					if (input_type == "datalayer")
+					{
+						if (input_input_details.datafilter != null && input_input_details.datafilter != '')
+						input_i_html += ", <a href=\"" + input_input_details.wfsurl + "&Filter=" + input_input_details.datafilter + "\" target=\"_blank\">Access to data (geoJSON)</a>";
+						else
+						input_i_html += ", <a href=\"" + input_input_details.wfsurl + "\" target=\"_blank\">Download layer</a>";
+					}
+					else
+					{
+						//input_i_html += ", <a href=\"" + input_input_details.wfsurl + "&Filter=" + input_input_details.datafilter  + "\" target=\"_blank\">Download layer</a>";
+					}
+				}
+				
+				input_i_html += "</td></tr></tbody></table><p>&nbsp;</p>";
+				
+				
+			}
+			inputs_metadata_container.innerHTML += input_i_html;
+				
+			
+			
+		}, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+	
+	
+	
+	createXMLHttpRequest(configs.portal_getIndicatorToolMetadata + "?indicatoruuid=" + indicator_uuid, function(response) 
+		{
+			var indicator_tool_metadata_container = document.getElementById("indicator_tool_metadata_container");
+			var toolInfo = response.tool_info;
+			
+			var toolMD_html = "The metadata of the tool used for deriving this indicator are as follows: <br /> </br />";
+			
+			toolMD_html += "<table width=\"100%\" border=\"0\"><tbody><tr><td width=\"16%\">Tool title:</td>";
+			if (!("tool-title" in toolInfo))
+				{
+					toolMD_html += "<td width=\"84%\"><strong>unknown</strong></td></tr><tr><td>Description:</td>";
+				}
+			else
+			{
+				toolMD_html += "<td width=\"84%\"><strong>" + toolInfo["tool-title"] + "</strong></td></tr><tr><td>Description:</td>";
+			}
+				
+			toolMD_html += "<td>" + toolInfo["tool-abstract"] + "</td></tr><tr> <td>Publication date: </td><td>" + getHumanReadableDateFromYYMMDD(toolInfo["publication-time"])  + "</td></tr>";
+			toolMD_html += "<tr><td>Implemented in:</td><td>" + toolInfo["tool-language"] + "</td></tr>";
+			toolMD_html += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";  
+						   
+			var toolPublisher =  toolInfo["tool-publisher"].data;  
+			toolMD_html +=  "<tr><td valign=\"top\">Publisher details: </td><td><p><strong>" + toolPublisher.organisation_name + "</strong></p><p>" + toolPublisher.organisation_description + "</p><p>&nbsp;</p><p>Website: <strong>" + toolPublisher.organisation_website + "</strong></p><p>contact person: <strong>" + toolPublisher.org_contact_person + "</strong></p><p>Contact email: <strong>" + toolPublisher.user_email + "</strong></p><p>Phone: <strong>" + toolPublisher.organisation_phone + "<strong></p><p>&nbsp;</p></td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>";
+			
+			
+			indicator_tool_metadata_container.innerHTML = toolMD_html;
+			
+		}, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+	
+	
+	
+	
+	
+	
+	
+	displayRating(false);
+	
+	// display the comments for the indicator
+	displayPreviousComments();
+	
+	//get the geo-layers and create map and its elements
+	//var mainMap = new OpenLayers.Map('map');
+				
+	createXMLHttpRequest(configs.portal_indicator_getOutputs + "?indicatoruuid=" + indicator_uuid, function(response) 
+		{
+			
+			if (response.status == 0)
+			{
+				var geolayers = response.outputs.data.geolayers;
+				var charts = response.outputs.data.charts;
+				
+				// MAP PART
+				var overlayGroup = new ol.layer.Group({
+					title: 'Overlays',
+					layers: [
+					]
+				});
+				
+				var backgroundLayer = new ol.layer.Tile({
+						title: 'OSM',
+						source: new ol.source.OSM(),
+						type: 'base'
+					});
+				
+				var BasemapGroup = new ol.layer.Group({
+						title: 'Base maps',
+						layers: [backgroundLayer]
+					});
+				
+			 mainMap = new ol.Map({
+					controls: ol.control.defaults({
+						attributionOptions: ({
+							collapsible: false
+						})
+					}),
+					target: 'map',
+					layers: [BasemapGroup
+					,
+					overlayGroup],
+					//renderer: 'webgl',
+					view: new ol.View({
+						center: ol.proj.transform([144.949315, -37.814766], 'EPSG:4326', 'EPSG:3857'),
+						maxZoom: 19,
+						zoom: 12
+					})
+				});
+				
+				var layerSwitcher = new ol.control.LayerSwitcher();
+    			mainMap.addControl(layerSwitcher);
+								
+				var outputsDownloadLinkDiv = document.getElementById("outputsDownloadLinks");
+				outputsDownloadLinkDiv.innerHTML = "";
+				outputsDownloadLinkDiv.innerHTML += "<p>Download Indicator Outputs: </p><p><ul>";
+					
+				for (var i = 0; i < geolayers.length; i++) 
+				{
+					var LayerName = geolayers[i].layername;
+					var Layertitle = geolayers[i].layerdisplayname;
+					var LayerURl = geolayers[i].wms.url;
+					var LayerWFSURL = geolayers[i].wfs.url;
+					var LayerStyle= geolayers[i].wms.styleparams.stylename;
+					var BoundingBox=[];
+					BoundingBox["0"]= geolayers[i].bbox["0"];
+					BoundingBox["1"]= geolayers[i].bbox["1"];
+					BoundingBox["2"]= geolayers[i].bbox["2"];
+					BoundingBox["3"]= geolayers[i].bbox["3"];
+					var Legend= geolayers[i].wms.styleparams.legendurl;
+					
+					//outputsDownloadLinks
+					
+					outputsDownloadLinkDiv.innerHTML += "<li><b>" + Layertitle + "</b>&nbsp;(<a target=\"_blank\" href=\"" + LayerWFSURL + "\">geoJSON</a> , <a target=\"_blank\" href=\"" + LayerWFSURL.split("outputFormat")[0] + "outputFormat=shape-zip" +  "\">ShapeFile</a>, <a target=\"_blank\" href=\"" + LayerWFSURL.split("outputFormat")[0] + "outputFormat=GML3" +  "\">GML 3</a>)</li></p>";
+					
+					var legendDiv = document.getElementById("legends");
+					legendDiv.innerHTML += "<h3>" + Layertitle + "</h3><img width=\"250\" src=\"" + Legend + "\" /><br /><br />";
+					
+					var wms_source = new ol.source.TileWMS({
+							url: LayerURl,
+							params: {
+									LAYERS:LayerName,
+									STYLES:LayerStyle
+							}
+									});
+					var wms_layer = new ol.layer.Tile({
+											source:  wms_source,
+											title:Layertitle}); 
+					
+					mainMap.getView().fit(ol.proj.transformExtent(BoundingBox, 'EPSG:4326', 'EPSG:3857'),mainMap.getSize());
+					//mainMap.getView().setZoom(mainMap.getView().getZoom()-1);
+				
+					wms_source.once('change', function (evt) {
+						console.log(wms_source.getState());
+						if (wms_source.getState() === 'ready') {
+							// now the source is fully loaded
+							//mainMap.getView().fit(ext,map.getSize());
+							
+							//}
+						}
+					});
+					
+					overlayGroup.getLayers().push(wms_layer);
+				}
+					
+				outputsDownloadLinkDiv.innerHTML += "</ul></p>";
+				
+				
+				// CHART PART
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				var charts_container = document.getElementById("charts_container");
+				charts_container.innerHTML = "<p> The following charts were produced for the indicator. Please select one to view its details in a pop-up window. If you have turned on your pop-up blocker, we advise to permit for the browser to create popup windows for this portal!</><p>&nbsp;</p>";
+				var chart_ul = document.createElement("ul");
+				charts_container.appendChild(chart_ul);
+				
+				alert(charts.length + " charts are available for this indicator!");
+				for (var i = 0; i < charts.length; i++) 
+				{
+						
+					var chartType = charts[i].type;
+					var chartdata =charts[i].data
+					
+					
+					
+					var chartLinkContent = "<li><a style=\"cursor: pointer\" onclick=\"javascript:window.open('chart-details.html?induuid=" + indicator_uuid + "&chartnum=" + i + "&title=" + charts[i].title + "', '" + charts[i].title + "', 'width=700,height=600');\">" + charts[i].title + "</a></li>";
+					alert(chartLinkContent);
+					
+					chart_ul.innerHTML += chartLinkContent;
+					
+					
+					// columnchart, barchart, linechart, areachart, radialchart, piechart, donutchart, scatterchart 
+					if (chartType=='columnchart')
+					{
+						var tmp_chartContainer = document.createElement("div");
+						
+						//charts_container.innerHTML += "<p>&nbsp;</p><p>&nbsp;</p>";
+						
+							/*if	(charts[i].data.length >0)
+							{   
+								var chartfields = [];
+								for (var key in charts[i].data[0]) {
+									chartfields.push(key);
+								}
+							}
+							var chartDataStore = Ext.create('Ext.data.JsonStore', {
+								fields: chartfields,
+								data: chartdata,
+								padding: '10 0 0 0',
+							
+							});	
+							
+							var thisChartsContainer = document.getElementById("chart_" + i + "_container");
+							//if (thisChartsContainer != null && thisChartsContainer != 'undefined')
+							//	alert(thisChartsContainer);
+								
+							var chart1 = Ext.create(
+								'Ext.chart.Chart',
+								{
+								renderTo: document.body,
+								height: 500, 
+								width: 600, animate: true,
+								shadow: false,
+								style: 'background: #fff;',
+								legend: {
+									position: 'top',
+									boxStrokeWidth: 0,
+									labelFont: '12px Helvetica'
+								},
+								store: chartDataStore,
+								insetPadding: 40,
+								items: [{
+									type  : 'text',
+									text  : charts[i].title,
+									font  : '20px Helvetica',
+									width : 100,
+									height: 30,
+									x : 40, //the sprite x position
+									y : 12  //the sprite y position
+								}],
+								axes: [{
+									type: 'Numeric',
+									position: 'left',
+									grid: true,
+									//fields: ['data1'], //can be automatically determined
+									label: {
+										renderer: function(v) { return v + '%'; }
+									},
+									minimum: 0
+								}, {
+									type: 'Category',
+									position: 'bottom',
+									grid: true,
+									fields: charts[i].xfield,
+									label: {
+										rotate: {
+											degrees: -45
+										}
+									}
+								}],
+								series: 
+								[{
+									type: 'column',
+									axis: 'left',
+									title: charts[i].yfieldtitle,
+									xField: charts[i].xfield,
+									yField: charts[i].yfield,
+									stacked: charts[i].stacked,
+									
+									style: {
+										opacity: 0.80
+									},
+									highlight: {
+										fill: '#000',
+										'stroke-width': 1,
+										stroke: '#fff'
+									},
+									tips: 
+									{
+										trackMouse: true,
+										style: 'background: #FFF',
+										renderer: function(storeItem, item) {
+											this.setTitle(storeItem.get(item.yField) + '%');
+										}
+									}
+								}]
+							});*/
+							
+							
+					}
+					
+				}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			}
+			else
+			{
+				alert("Something went wrong retrieving the outputs of the indicator from the server!");	
+			}
+			
+		}, function(status) {
+		alert("Error establishing connection with server!");
+	});
+	
+	
+	
+	
+	// CREATE THE CHARTS!
+	
+	
+	
+	
+	
+}
+
+	
+	
+	
+function downloadAsFile(filename, text, element) {
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+}
+
+function vote(value)
+{
+	if (hasUserVoted)
+	{
+		alert("You cannot vote more than once!");
+	}
+	else
+	{
+		hasUserVoted = true; //portal_Indicator_vote
+		createXMLHttpRequest(configs.portal_Indicator_vote + "?uuid=" + indicator_uuid + "&ratevalue=" + value, function(response) 
+		{
+			if (response.status == 0)
+			{
+				alert("Your vote was successfully registered!");
+				displayRating(true);
+			}
+			else
+			{
+				alert("Error was occurred while registering your vote! Please try again!");
+			}
+			 }, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+	}
+}
+
+
+
+
+
+
+function displayRating(voted)
+{
+	var RatingElement = document.getElementById("rate_value");
+	var numberOfvotesElement = document.getElementById("no_rates");
+		
+	var emptyStar = "images/icons/star_empty.PNG";
+	var halfStar = "images/icons/star_half.PNG";
+	var fullStar = "images/icons/star_full.PNG";
+	
+	createXMLHttpRequest(configs.portal_getIndicator_RatingValue + "?uuid=" + indicator_uuid, function(response) 
+	{
+		//alert(JSON.stringify(response));
+		var ratingValue = response.data.rating;
+		
+		if (ratingValue == 0)
+		{
+			rank_star_1.src = emptyStar;
+			rank_star_2.src = emptyStar;
+			rank_star_3.src = emptyStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue > 0 && ratingValue < 1)
+		{
+			rank_star_1.src = halfStar;
+			rank_star_2.src = emptyStar;
+			rank_star_3.src = emptyStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue == 1)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = emptyStar;
+			rank_star_3.src = emptyStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue > 1 && ratingValue < 2)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = halfStar;
+			rank_star_3.src = emptyStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue == 2)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = emptyStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue > 2 && ratingValue <3)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = halfStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue == 3)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = fullStar;
+			rank_star_4.src = emptyStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue > 3 && ratingValue <4)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = fullStar;
+			rank_star_4.src = halfStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue == 4)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = fullStar;
+			rank_star_4.src = fullStar;
+			rank_star_5.src = emptyStar;
+		}
+		else if (ratingValue > 4 && ratingValue <5)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = fullStar;
+			rank_star_4.src = fullStar;
+			rank_star_5.src = halfStar;
+		}
+		else if (ratingValue == 5)
+		{
+			rank_star_1.src = fullStar;
+			rank_star_2.src = fullStar;
+			rank_star_3.src = fullStar;
+			rank_star_4.src = fullStar;
+			rank_star_5.src = fullStar;
+		}
+		
+		if (!voted)
+		{
+			numberOfvotesElement.appendChild(document.createTextNode(no_ratevote));
+			
+			//numberOfvotesElement.innerHTML = '';
+			var calcRes = 0;
+			if (no_ratevote > 0)
+				calcRes = parseFloat(Math.round((totalRateVal / no_ratevote) * 100) / 100).toFixed(2);
+				
+			RatingElement.innerHTML = calcRes;
+		
+		}
+		else
+		{
+			createXMLHttpRequest(configs.portal_getIndicatorInfo + "?indicatoruuid=" + indicator_uuid, function(response) 
+		{
+			var indicator = response.indicator_details;
+			no_visits = indicator.no_visits;
+			no_ratevote = indicator.no_ratevote;
+			
+			 
+			numberOfvotesElement.innerHTML = no_ratevote;
+			
+			var calcRes = 0;
+			if (no_ratevote > 0)
+				calcRes = parseFloat(Math.round((totalRateVal / no_ratevote) * 100) / 100).toFixed(2);
+				
+			
+			
+			RatingElement.innerHTML = calcRes;
+			}, function(status) {
+			alert("Error establishing connection with server to modify number of visits fo the indicator!");
+		});
+		}
+		
+		
+		
+		
+		
+	}, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+	
+	
+	
+	
+		
+	
+		
+}
+
+
+
+function displayPreviousComments()
+{
+	// manipulate previous comments
+	
+	createXMLHttpRequest(configs.portal_indicator_listComments + "?uuid=" + indicator_uuid, function(response) 
+		{
+			var container_comments = document.getElementById("container_comments");
+			var commentsList = response.data;
+			
+			var comments_html = "";
+			
+			for (var i = 0; i < commentsList.length; i++)
+			{
+			comments_html += "<div style=\"width: 750px; border-width: 1px; border-color:#BBBBBB; border-style:solid; vertical-align:middle; margin-left: 15px;\"><table width=\"744\" border=\"0\" cellpadding=\"12\" cellspacing=\"12\"><tbody><tr><td width=\"719\">";
+			comments_html += "" +commentsList[i].content + "</td></tr>";
+			comments_html += "<td><span class=\"details\"><img src=\"images/Calendar-icon.png\" width=\"15\"/>&nbsp; " + getHumanReadableDateFromYYMMDD(commentsList[i].ctime) + " |&nbsp;<img src=\"images/user.png\" alt=\"\" width=\"15\"/> &nbsp;" + commentsList[i].userinfo.username + ",</span> " + commentsList[i].userinfo.organisation + " | email: <a href=\"" + "mailto:" + commentsList[i].userinfo.email + "\">" + commentsList[i].userinfo.email + "</a></td></tr></tbody></table></div><p>&nbsp;</p>";
+			
+			//console.log(comments_html);
+			}
+			container_comments.innerHTML = comments_html;
+			
+		}, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+}
+
+
+function resetCommentForm()
+{
+	 comment_form_name.value = '';
+	 comment_form_org.value = '';
+	 comment_form_email.value = '';
+	 comment_form_conent.value = '';
+}
+
+function addComment()
+{
+	
+	var userInfo_jsonData = {}; 
+	userInfo_jsonData["username"] = comment_form_name.value;
+	userInfo_jsonData["organisation"] = comment_form_org.value;
+	userInfo_jsonData["email"] = comment_form_email.value;
+	
+	var params = {};
+	params["uuid"] = indicator_uuid;
+	params["content"] = comment_form_conent.value;
+	params["userinfo"] = JSON.stringify(userInfo_jsonData);
+	
+	createXMLHttpRequest_Post(configs.portal_indicator_addComment, params, function(response) 
+	{
+		if (response.status == 0)
+		{
+			alert("Your comment was successfully registered in the system!"); 
+			displayPreviousComments(); 
+			resetCommentForm();
+		}
+		else
+			alert("Something went wrong registering your comment!");
+		
+	}, function(status) {
+		alert("Error establishing connection with server to modify number of visits fo the indicator!");
+	});
+}
+</script>
+<style> 
+ul.tabs { padding: -5px 0; font-size: 0; margin:0; list-style-type: none; text-align: left; } ul.tabs li { display: inline; margin: 0; margin-right:3px; } ul.tabs li a { font: normal 12px Verdana; text-decoration: none; position: relative; z-index: 1; padding: 7px 16px; border: 1px solid #CCC; border-bottom-color:#B7B7B7; color: #000; background: #F0F0F0; border-radius: 6px 6px 0px 0px; -moz-border-radius: 6px 6px 0px 0px; outline:none; } ul.tabs li a:hover { border: 1px solid #B7B7B7; background:#E0E0E0; } ul.tabs li.selected a { position: relative; top: 0px; font-weight:bold; background: white; border: 1px solid #B7B7B7; border-bottom-color: white; }
+
+div .tabcontents { width: 800px; border: 1px solid #B7B7B7; padding: 20px; background-color:#FFF; border-radius: 0 2px 2px 2px; } 
+div .tabcontents2 { width: 750px; border: 1px solid #B7B7B7; padding: 20px; background-color:#FFF; border-radius: 0 2px 2px 2px; } 
+
+
+</style>
+</head>
+<body onload="javascript:initialisePage();">
+<!-- BEGIN wrapper -->
+<div id="wrapper">
+  <!-- BEGIN header -->
+  <div id="header" style="height: 360px;">
+    
+    <table width="100%" border="0" style="margin-top: 15px;">
+  <tbody>
+    <tr>
+      <td>
+       <h1 class="children" style="font-size: 30px;">Urban Analytics Infrastructure <span style="color:rgba(255,158,0,1.00)">Portal</span></h1>
+      <p style="margin-bottom:25px; text-transform:none">A Digital Infrastructure for exploring urban quality of life indicators </p>
+      
+      </td>
+      <td valign="top" align="center"><br />
+        <a href="sitemap.html" style="text-decoration:none">Sitemap</a> &nbsp; | &nbsp; <a href="http://apps.csdila.ie.unimelb.edu.au/uadi/" style="text-decoration:none" target="_blank">Login</a></td>
+    </tr>
+  </tbody>
+</table>
+    
+    <div width="100%"  style="height: 200px; margin-top: 15px;"><img src="images/banner.png" width="980" height="200" alt=""/></div>
+    <!-- begin pages -->
+    <ul class="pages">
+      <!-- begin logo -->
+   
+    
+
+     
+    <!-- end pages -->
+    
+    <!-- end logo -->
+    </ul>
+    <!-- end pages -->
+   
+    <div class="break"></div>
+    
+    <!-- begin sponsor -->
+    <div class="sponsor"> <a href="#"></a> </div>
+    <!-- end sponsor -->
+    <!-- begin categories -->
+    <ul class="categories">
+      <li><a href="index.html" style="background-color: #003366; color: #FFFFFF;">HOME</a></li>
+      <li><a href="about.html">ABOUT UADI</a></li>
+      <li><a href="browse.html">BROWSE INDICATORS	</a></li>
+      <li><a href="r-team.html">RESEARCH TEAM</a></li>
+      <li><a href="partners.html">PARTNERS</a></li>
+      <li><a href="links.html">LINKS</a></li>
+    </ul>
+    <!-- end categories -->
+    
+    <div style="height:280px;">
+    
+
+    
+    </div>
+    
+  </div>
+  <!-- END header -->
+  
+  <div id="content" style="width: 980px;">
+    <!-- begin recent posts -->
+    <div class="recent">
+      <!-- begin post -->
+      <div class="single">
+<div align="centre" width="410" style="margin-left:40px;">
+          <p>&nbsp;</p>
+          <table width="844" border="0" align="center">
+            <tbody>
+                            <tr>
+                <td width="49" align="left"><img src="images/indicator-icon.png" width="35"  alt="" style="float: left; padding-right: 5px; padding-top: 5px;"/></td>
+                <td width="739"><span style="font-size:18px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" id="indicator_title"></span></td>
+                <td width="42"><table width="100%" border="0">
+                  <tbody>
+                    <tr>
+                      <td align="right"><img src="images/icons/compare.PNG" width="35" height="38" alt=""/></td>
+                    </tr>
+                    <tr>
+                      <td style="font-size: 10px">Compare</td>
+                    </tr>
+                  </tbody>
+                </table></td>
+              </tr>
+            </tbody>
+          </table>
+          <table width="844" border="0" align="center">
+            <tbody>
+              <tr> </tr>
+              <tr>
+                <td align="left">&nbsp;</td>
+                <td colspan="2"><span class="details"> <img src="images/Calendar-icon.png" width="15"/>&nbsp; <span id="indicator_date"></span> |&nbsp;<img src="images/user.png" alt="" width="15"/> &nbsp;<span id="indicator_publisher"></span> | &nbsp;<img src="images/browse-ind-icons/geo.png" width="15" alt=""/>&nbsp;<span id="indicator_geo"></span>&nbsp; | &nbsp; <img src="images/browse-ind-icons/ByTheme.png" width="15" alt=""/>&nbsp;<span id="indicator_themes"></span></span></span></td>
+              </tr>
+              <tr>
+                <td colspan="3" align="justify"><p><span class="details"></p>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" align="justify"><p>&nbsp;</p>
+                  <p><div class="thumb" style="float:left; padding-right:15px; padding-bottom:10px;"><img src="images/feature-images/urban-analytics-feature1.PNG" id="indicator_thumbnail" width="250" style="border-width: 1px; alt=""/></div><span id="indicator_abstract"></span>
+               </td>
+              </tr>
+              <tr>
+                <td colspan="3" align="left"><p>&nbsp;</p>
+                  <p>&nbsp;</p>
+                  
+                  
+                  
+                  
+                  <script> function ShowMyDiv(Obj){ var elements = document.getElementsByTagName('div'); for (var i = 0; i < elements.length; i++) if(elements[i].className=='tabcontent') elements[i].style.display= 'none'; document.getElementById(Obj.rel).style.display= 'block';
+				 //------------------------------------ 
+				 var ul_el = document.getElementById('tab_ul'); var li_el = ul_el.getElementsByTagName('li'); for (var i = 0; i < li_el.length; i++) li_el[i].className=""; Obj.parentNode.className="selected"; } 
+                 
+                 
+                 
+                 function ShowMyDiv2(Obj){ var elements = document.getElementsByTagName('div'); for (var i = 0; i < elements.length; i++) if(elements[i].className=='tabcontent2') elements[i].style.display= 'none'; document.getElementById(Obj.rel).style.display= 'block';
+				 //------------------------------------ 
+				 var ul_el = document.getElementById('tab_ul2'); var li_el = ul_el.getElementsByTagName('li'); for (var i = 0; i < li_el.length; i++) li_el[i].className=""; Obj.parentNode.className="selected"; } 
+                 
+                 
+                 </script>
+                  
+                  
+                  
+                  
+                  <ul id="tab_ul" class="tabs"> <li class="selected"><a rel="tab_map" onclick="javascript:ShowMyDiv(this);">Map View</a></li> 
+                    
+                    <!--<li class=""><a rel="tab_table"  onclick="javascript:ShowMyDiv(this);">Table view</a></li> -->
+                    
+                    <li class=""><a rel="tab_chart"  onclick="javascript:ShowMyDiv(this);">Charts</a></li> 
+                    
+                  </ul>
+                  
+                  <div class="tabcontents"> <div class="tabcontent" id="tab_map" style="display: block;">  
+                    <table width="800" border="0">
+                      <tbody>
+                        <tr>
+                          <td width="579" valign="top">
+                            <p><span><strong>Interactive Map </strong></span></p>
+                            
+                            <div style="width:95%; height:400px" id="map">&nbsp;</div>
+                            <p>&nbsp;</p>
+                            <p>&nbsp;</p>
+                           <div id="outputsDownloadLinks"></div>
+                          </td>
+                          <td width="211" align="left" valign="top"> <p><span><strong> Legend</strong> for layers</span><br /><br />
+                          
+                          <div id="legends"> </div>
+                          
+                          </p>
+                            <p>&nbsp;</p>
+                            <p>&nbsp; </p>
+                            <div id="layerswitcher" class="olControlLayerSwitcher"></div>
+                            
+                            
+                          </td>
+                          
+                          
+                          
+                        </tr>
+                      </tbody>
+                    </table>
+                    <p>&nbsp;</p>
+                    </div>
+                  <div class="tabcontent" id="tab_table" style="display: none;">
+                    <p><img src="images/chart-samples/table.PNG" width="632" alt=""/></p>
+                  </div>
+                  <div class="tabcontent" id="tab_chart" style="display: none;">&nbsp;</p><div id="charts_container" style="width:800px;">&nbsp;</div></div> 
+                  
+                  
+                  
+                  
+                  <p>&nbsp;</p>
+                  <p>&nbsp;</p>
+                  <p>&nbsp;</p>
+                  <p><span style="font-size:18px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;">Indicator Provenance Information</span></p>
+                  <p>&nbsp;</p>
+                  <ul id="tab_ul2" class="tabs">
+                    <li class="selected"> <a rel="tab_inputs" onclick="javascript:ShowMyDiv2(this);">Inputs Metadata</a></li>
+                    <li class=""><a rel="tab_Tool_Metadata"  onclick="javascript:ShowMyDiv2(this);">Tool Metadata</a></li>
+                  </ul>
+                  <div class="tabcontents2">
+                    <div class="tabcontent2" id="tab_inputs" style="display: block;">
+                      <p align="left" id="indicator_input_metadata_container"></p>
+                    </div>
+                    <div class="tabcontent2" id="tab_Tool_Metadata" style="display: none;">
+                      <p align="left" id="indicator_tool_metadata_container"></p>
+                    </div>
+                    
+                  </div>
+                  <p>&nbsp;</p>
+                  <p>&nbsp; </p>
+                  <p><span style="font-family: 'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif; font-size: 18px">Rating and user comments</span></p>
+                  <div style="width: 790px; border-width: 1px; border-color:#BBBBBB; border-style:solid; vertical-align:middle">
+                    <table width="750" border="0" align="center" style="margin:15px;">
+                      <tbody>
+                        <tr>
+                          <td width="537" valign="middle">This indicator has been rated by the <span id="no_rates"><strong>  </strong></span> user(s) as <span id="rate_value"><strong></strong></span>! </td>
+                          <td width="203" align="right"><table width="200" border="0">
+                            <tbody>
+                              <tr>
+                                <td><img src="images/icons/star_empty.PNG" alt="" width="25" height="25" id="rank_star_1" onclick="vote(1);" style="cursor:pointer"/></td>
+                                <td><img src="images/icons/star_empty.PNG" alt="" width="25" height="25" id="rank_star_2" onclick="vote(2);" style="cursor:pointer"/></td>
+                                <td><img src="images/icons/star_empty.PNG" alt="" width="25" height="25" id="rank_star_3" onclick="vote(3);" style="cursor:pointer"/></td>
+                                <td><img src="images/icons/star_empty.PNG" alt="" width="25" height="25" id="rank_star_4" onclick="vote(4);" style="cursor:pointer"/></td>
+                                <td><img src="images/icons/star_empty.PNG" alt="" width="25" height="25" id="rank_star_5" onclick="vote(5);" style="cursor:pointer"/></td>
+                              </tr>
+                            </tbody>
+                          </table></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div style="width: 750px; border-width: 1px; border-color:#BBBBBB; border-style:solid; margin-left: 15px;">
+                      <p>&nbsp; </p>
+                      <p>To write your comment, please fill out the following form and press submit: </p>
+                      <table width="680" border="0" cellpadding="5" cellspacing="5" style="margin-left:15px;">
+                        <tbody>
+                          <tr>
+                            <td width="110">Name:</td>
+                            <td width="560"><input type="text" name="textfield" id="comment_name" /></td>
+                          </tr>
+                          <tr>
+                            <td>Organisation:</td>
+                            <td><input type="text" name="textfield2" id="comment_organisationName" /></td>
+                          </tr>
+                          <tr>
+                            <td>Email:</td>
+                            <td><input type="text" name="textfield3" id="comment_email" /></td>
+                          </tr>
+                          <tr>
+                            <td valign="top">Your Comment: </td>
+                            <td><textarea id="comment_content" name="textarea" cols="60" rows="5"></textarea></td>
+                          </tr>
+                          <tr>
+                            <td valign="top">&nbsp;</td>
+                            <td><p>
+                              <input type="submit" id="submitComment" value="Submit" style="font-size:12px; width: 60px; height: 22px;" onclick="addComment();" />
+                              <input type="submit" id="ResetComment" value="Reset" style="font-size:12px;width: 60px; height: 22px;" onclick="resetCommentForm()" />
+                              
+                            </p></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <p>&nbsp;</p>
+                      <p></p>
+                    </div>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <p><span style="font-family: 'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif; font-size: 18px">&nbsp;&nbsp;Previous Comments</span></p>
+                   
+                    <div id="container_comments">&nbsp;</div>
+                  
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                 </div></td>
+              </tr>
+            </tbody>
+          </table>
+          
+          
+          <p><div id="xxx">&nbsp;</div></p>
+          <p>&nbsp;</p>
+</div>
+<!-- END wrapper -->
+
+
+
+
+
+<!-- BEGIN footer -->
+<div id="footer">
+  <p class="l">Copyright &copy; 2017 - <strong>Urban Analytics Infrastructure (Beta version) </strong> &middot; All Rights Reserved.</p>
+</div>
+<!-- END footer -->
+</body>
+</html>

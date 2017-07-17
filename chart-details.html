@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Untitled Document</title>
+<link rel="stylesheet" href="CSS/example.css">
+<link rel="stylesheet" type="text/css" href="CSS/ext-theme-neptune-all.css">
+
+<script type="text/javascript" src="js/portal/config.js"></script>
+<script type="text/javascript" src="js/portal/ajax.js"></script>
+<script type="text/javascript" src="js/extjs/ext-all-debug.js"></script>
+<script type="text/javascript" src="js/extjs/examples.js"></script>
+<script type="text/javascript" src="js/chart.js"></script>
+
+<style type="text/css">
+svg {
+    display: block;
+	margin: auto;
+	background: white;
+}
+
+.x-border-box{
+	background:#EEF4F9 !important;
+}
+
+
+@media only screen and (min-width: 405px) {
+    div { 
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        min-width: 100%; 
+		
+    }
+}
+@media only screen and (min-width: 810px) {
+    div { 
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        min-width: 50%; 
+    }
+}
+@media only screen and (min-width: 1215px) {
+    div { 
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        min-width: 33%; 
+    }
+}
+@media only screen and (min-width: 1620px) {
+    div { 
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        min-width: 25%; 
+    }
+}
+@media only screen and (min-width: 2025px) {
+    div { 
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        min-width: 20%; 
+    }
+}
+</style>
+
+<script>
+
+function initialise()
+{
+	// LINE CHART, AREA CHART, RADIAL CHART, and SCATTER CHART  have issues. Need to be resolved!
+	var configs = new configurationSettings();
+
+	var indicator_uuid = "aabcf97c-c285-43ff-8fb1-b9b44d4bfd77";
+	var chart_number = 2;
+	var link = configs.portal_indicator_getOutputs + "?indicatoruuid=" + indicator_uuid;
+			
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange=function()
+		{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200){
+			var response = JSON.parse(xmlhttp.response);
+
+							var charts = [{"yfield":["data1","data2","data3","data4"],"stacked":true,"title":"Your Bar Chart 2 (Stacked)","yfieldtitle":["IE","Firefox","Chrome","Safari"],
+		"xfield":"month","data":[{"data1":20,"month":"Jan","data4":4,"data2":37,"data3":35},{"data1":20,"month":"Feb","data4":5,"data2":37,"data3":36},{"data1":19,
+		"month":"Mar","data4":4,"data2":36,"data3":37},{"data1":18,"month":"Apr","data4":5,"data2":36,"data3":38},{"data1":18,"month":"May","data4":4,"data2":35,"data3":39},
+		{"data1":17,"month":"Jun","data4":4,"data2":34,"data3":42},{"data1":16,"month":"Jul","data4":4,"data2":34,"data3":43},{"data1":16,"month":"Aug","data4":4,"data2":33,
+		"data3":44},{"data1":16,"month":"Sep","data4":4,"data2":32,"data3":44},{"data1":16,"month":"Oct","data4":4,"data2":32,"data3":45},{"data1":15,"month":"Nov","data4":4,
+		"data2":31,"data3":46},{"data1":15,"month":"Dec","data4":4,"data2":31,"data3":47}],"type":"barchart","seqnum":4}];
+					
+					for (var i = 0; i < charts.length; i++) 
+					{			
+						if (charts[i] != null){
+							var obj = chart(charts, i);	
+						}
+					}
+
+			}
+		}
+	xmlhttp.open("GET",link,true);
+	xmlhttp.send(null);
+}
+
+</script>
+</head>
+<script type="text/javascript">
+	initialise();
+</script>
+<body>
+</body>
+</html>

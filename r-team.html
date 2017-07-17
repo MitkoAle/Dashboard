@@ -1,0 +1,747 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Urban Analytics Data Infrastructure Portal (Beta)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="CSS/style.css" />
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="ie.css" /><![endif]-->
+<script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.cycle.all.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+
+<script type="text/javascript" src="js/portal/config.js"></script>
+<script type="text/javascript" src="js/portal/ajax.js"></script>
+
+<script type="text/javascript">
+
+function createMostVisitedIndicatorContent()
+{
+	var mostVisitedBox = document.getElementById("mostVisitedBox");
+	mostVisitedBox.innerHTML += "<h2>Most visited indicators</h2>";
+	
+	var configs = new configurationSettings();
+	createXMLHttpRequest(configs.portal_list_top5_most_visited_indicators, function(response) 
+	{
+		//alert(JSON.stringify(response));
+		var indicators = response.indicators_list;
+		//alert(indicators.length);
+		
+		var mainUL = document.createElement("ul");
+		mainUL.className  = "popular";
+		
+		
+		for (var i=0; i< indicators.length; i++)
+		{
+			var tmp_indicator = indicators[i];
+			var tmp_li = document.createElement("li");
+			mainUL.appendChild(tmp_li);
+			
+			var tmp_a = document.createElement("a");
+			tmp_a.title = tmp_indicator.jobname;
+			tmp_a.href = configs.indicatordetailsPage + "?uuid=" + tmp_indicator.uuid;
+			tmp_a.appendChild(document.createTextNode(tmp_indicator.jobname));
+			tmp_li.appendChild(tmp_a);
+			
+			var tmp_p = document.createElement("p");
+			tmp_li.appendChild(tmp_p);
+			
+			tmp_p.appendChild(document.createTextNode("by " + 
+				tmp_indicator.organisation_name + " | for " + 
+				tmp_indicator.geoclass.label));
+		}
+		
+		mostVisitedBox.appendChild(mainUL);
+		
+	}, function(status) {
+	//do something here if the request was un-successful!
+	});
+	
+}
+
+function clearTextBox(textbox)
+	{
+		textbox.value = '';
+		textbox.style.color = "#000000";
+	}
+
+	function submitSearch()
+	{
+		var searchBox = document.getElementById("searchBox");
+		window.location = "search-results.html?k=" + encodeURIComponent(searchBox.value);
+	}
+	
+	function handle(e){
+        if(e.keyCode === 13){
+            e.preventDefault(); // Ensure it is only this code that rusn
+			submitSearch()
+        }
+    }
+	
+	
+	
+	function showListOfThemes()
+{
+	
+	var container = document.getElementById("bbithemes");
+	container.innerHTML = "";
+	container.innerHTML += "<h2>BROWSE INDICATORS BY THEMES</h2>";
+	
+	var configs = new configurationSettings();
+	createXMLHttpRequest(configs.portal_list_themes_with_indicatorCount
+	+ "?onturi=" + "http://csdila.unimelb.edu.au/ontologies/f/ThematicClasses.owl" + 		"&conuri=Theme&ontformat=RDF/XML&namespace=http://csdila.unimelb.edu.au/ontologies/indicatortheme%23" + 
+	"&includeSubClasses=1&withreasoning=1" , function(response) 
+	{
+	//do your things here if the request was successful!
+	//alert(JSON.stringify(response));
+		var outputs = response.outputs;
+		//alert(JSON.stringify(response));
+		var top_themes = Object.keys(outputs);
+		
+		
+		
+		if (top_themes.length > 0)
+		{
+			for (var i = 0; i< top_themes.length; i++)
+			{
+				var topThemeString = top_themes[i].toString().split('#')[1];
+				//alert(topThemeString);
+				var current_top_theme_array = outputs[top_themes[i]];
+				
+				var ul_container = document.createElement("ul");
+				var li_topTier_theme_tmp = document.createElement("li");
+				var li_b_tmp = document.createElement("b");
+				var li_b_tmp_linkText = document.createTextNode(topThemeString);
+				li_b_tmp.appendChild(li_b_tmp_linkText);
+				
+				li_topTier_theme_tmp.appendChild(li_b_tmp);
+				
+				ul_container.appendChild(li_topTier_theme_tmp);
+				container.appendChild(ul_container);
+				//alert(current_top_theme_array.length);
+				
+				var ul_container2 = document.createElement("ul");
+				ul_container.appendChild(ul_container2);
+				for (var j = 0; j< current_top_theme_array.length; j++)
+				{
+					//alert(current_top_theme_array[j].label);
+					
+					
+					
+				var li_theme_tmp = document.createElement("li");
+				var li_a_tmp = document.createElement("a");
+				var li_a_tmp_linkText = document.createTextNode(current_top_theme_array[j].label);
+				li_a_tmp.appendChild(li_a_tmp_linkText);
+				li_a_tmp.title = current_top_theme_array[j].label;
+				var href = configs.browseByThemeDetails + "?n=" + current_top_theme_array[j].label + "&themeOntId=" + current_top_theme_array[j].ontid + "&themeclassuri=" + encodeURIComponent(current_top_theme_array[j].namespace + current_top_theme_array[j].instance);
+				
+				li_a_tmp.href = href;
+				li_theme_tmp.appendChild(li_a_tmp);
+				li_theme_tmp.appendChild(document.createTextNode(" (" + current_top_theme_array[j].indicator_count + ")")); 
+				
+				ul_container2.appendChild(li_theme_tmp);
+				}
+				
+			}
+		}
+		else
+		{
+			var p = document.createElement("p");
+			p.style.color = "red";
+			p.appendChild(document.createTextNode("No themes exist in the infrastructure!"));
+			container.appendChild(p);
+		}
+		
+		
+		
+		
+		
+	}, function(status) {
+	//do something here if the request was un-successful!
+	alert("!");
+});
+	
+}
+</script>
+</head>
+<body onload="javascript:createMostVisitedIndicatorContent();showListOfThemes();">
+<!-- BEGIN wrapper -->
+<div id="wrapper">
+  <!-- BEGIN header -->
+  <div id="header">
+    
+    <table width="100%" border="0" style="margin-top: 15px;">
+  <tbody>
+    <tr>
+      <td>
+       <h1 class="children" style="font-size: 30px;">Urban Analytics Infrastructure <span style="color:rgba(255,158,0,1.00)">Portal</span></h1>
+      <p style="margin-bottom:25px; text-transform:none">A Digital Infrastructure for exploring urban quality of life indicators </p>
+      
+      </td>
+      <td valign="top" align="center"><br />
+        <a href="sitemap.html" style="text-decoration:none">Sitemap</a> &nbsp; | &nbsp; <a href="http://apps.csdila.ie.unimelb.edu.au/uadi/" style="text-decoration:none" target="_blank">Login</a></td>
+    </tr>
+  </tbody>
+</table>
+    
+    <div width="100%"  style="height: 200px; margin-top: 15px;"><img src="images/banner.png" width="980" height="200" alt=""/></div>
+    <!-- begin pages -->
+    <ul class="pages">
+      <!-- begin logo -->
+   
+    
+
+     
+    <!-- end pages -->
+    
+    <!-- end logo -->
+    </ul>
+    <!-- end pages -->
+   
+    <div class="break"></div>
+    
+    <!-- begin sponsor -->
+    <div class="sponsor"> <a href="#"></a> </div>
+    <!-- end sponsor -->
+    <!-- begin categories -->
+    <ul class="categories">
+      <li><a href="index.html" style="background-color: #003366; color: #FFFFFF;">HOME</a></li>
+      <li><a href="about.html">ABOUT UADI</a></li>
+      <li><a href="browse.html">BROWSE INDICATORS	</a></li>
+      <li><a href="r-team.html">RESEARCH TEAM</a></li>
+      <li><a href="partners.html">PARTNERS</a></li>
+      <li><a href="links.html">LINKS</a></li>
+    </ul>
+    <!-- end categories -->
+    
+    <div style="height:250px;">
+    <table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td align="center"><p><br />
+        <br />
+        <br />
+        <span style="font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif; font-size:28px; font-weight:400">Explore Urban Quality of Life Indicators </span><br />
+        
+        <span style="font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif; font-size:18px; color:rgba(179,177,177,1.00)">Free and open access to urban quality of life indicators for Australian cities</span>
+      </p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>
+          <input name="textfield" type="text" onfocus="javascript: clearTextBox(this);" onkeydown="handle(event);" id="searchBox" style="height: 40px; color:rgba(180,173,173,1.00)" value="  Search indicators e.g. Green areas per 100,000 population OR Perth accessibility to jobs" size="100" />
+        </p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+       <p>Browse indicators by <strong><a href="browse-alphabetic.html" style="text-decoration:none">Name</a></strong></a>, <strong><a href="browse-by-Year.html" style="text-decoration:none">Year</a></strong></a>, <strong><a href="browse-by-theme.html" style="text-decoration:none">Theme</a></strong> or <strong><a href="browse-geographic.html" style="text-decoration:none">Geographic Boundary</a></strong></p></td>
+    </tr>
+  </tbody>
+</table>
+
+    
+    </div>
+    
+  </div>
+  <!-- END header -->
+  
+  <div id="content">
+    <!-- begin recent posts -->
+    <div class="recent">
+      <!-- begin post -->
+      <div class="single">
+        <h2>RESEARCH TEAM</h2>
+        <p>The UADI project is led by Prof. Abbas Rajabifard in collaboration with 11 other investigators from five other Australian universities. The UADI teams in partner universities are as follows:</p>
+        <p>&nbsp;</p>
+        <p><a href="#melbourne">Team at The University of Melbourne</a></p>
+        <p><a href="#unsw">Team at The University of New South Wales</a></p>
+        <p><a href="#uq">Team at The University of Queensland</a></p>
+        <p><a href="#canberra">Team at The University of Canberra</a></p>
+        <p><a href="#uwa">Team at The University of Western Australia</a></p>
+        <p><a href="#uow">Team at The University of Wollongong</a></p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <table width="600" border="0">
+          <tbody>
+            <tr>
+              <td width="120"><a name="melbourne"><img src="images/uni-logos/uom-logo.png" width="100" /><br /><br /><br /></a></td>
+              <td style="font-size:16px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom">Project Team at The University of Melbourne<br />
+                &nbsp;<br />
+              <br /></td>
+            </tr>
+            <tr>
+              <td width="120" align="right" ><a name="melbourne"><img src="images/r-team/Abbas_Rajabifard.jpg" width="80" style="margin-right: 10px; box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></a></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Abbas Rajabifard</strong> (Lead Chief Investigator)<br />
+ Director of Centre for Spatial Data Infrastructures and Land Administration <br />
+ Head of Department of Infrastructure Engineering <br />
+<br />
+abbas.r@unimelb.edu.au <br />
+<br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/BStimson.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong> Professor Robert Stimson</strong> (Chief Investigator)<br />
+Honorary, Department of Resource Management and Geography <br />
+The University of Melbourne<br />
+<br />
+rstimson@unimelb.edu.au<br />
+<br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/Mohsen_Kalantari.png" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Mohsen Kalantari</strong> (Chief Investigator)<br />
+Associate Director, Centre for Spatial Data Infrastructures and Land Administration <br />
+Chief Investigator - Technical Manager <br />
+<br />
+mohsen.kalantari@unimelb.edu.au<br />
+<br /></td>
+            </tr>
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/soheil_sabri.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Soheil Sabri </strong><br />
+Research Fellow - Urban Analytics <br />
+Project Manager <br />
+<br />
+soheil.sabri@unimelb.edu.au<br />
+<br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/Sam2.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Sam Amirebrahimi</strong> <br />
+Research Fellow - Spatial Data Scientist <br />
+System Architect and developer<br />
+<br />
+amis@unimelb.edu.au<br />
+<br /></td>
+            </tr>
+            
+            
+             <tr>
+              <td width="120" align="right" ><img src="images/r-team/Benny-Chen-Portrait.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Yiqun (Benny) Chen</strong> <br />
+Research Fellow<br />
+<br />
+yiqun.c@unimelb.edu.au<br />
+<br />
+<br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/muyiwa-agunbiade.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Muyiwa Agunbiade</strong><br />
+Research Fellow - Urban Analytics<br />
+<br />
+muyiwaea@unimelb.edu.au<br />
+<br />
+<br /></td>
+            </tr>
+            
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/azadeh-keshtiarast.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>                Azadeh Keshtiarast </strong><br />
+                Research Assistant - Spatial Data Integration <br />
+                <br />
+                a.keshtiarast@unimelb.edu.au<br />
+              <br /></td>
+            </tr>
+            
+            
+            
+          <br />
+          </tbody>
+        </table>
+        <p> </p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <table width="600" border="0">
+          <tbody>
+            <tr>
+              <td width="120"><a name="unsw"><img src="images/uni-logos/UNSW_coat_of_arms.png" width="100" /><br /><br /><br /></a></td>
+              <td style="font-size:16px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom">Project Team at The University of New South Wales <br />
+              <br /></td>
+            </tr>
+            
+             <tr>
+              <td width="120" align="right" ><img src="images/r-team/unsw/BillRandolph.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Bill Randolph</strong> (Chief Investigator)<br />
+                Director of City Futures Research Centre,Built Environment <br />
+                <br />
+b.randolph@unsw.edu.au<br />
+<br /></td>
+            </tr>
+            
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/unsw/Chriss_Pettit.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong> Professor Christopher Pettit</strong> (Chief Investigator)<br />
+                Associate Director of City Futures Research Centre,Built Environment<br />
+                <br />
+                c.pettit@unsw.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            
+             <tr>
+              <td width="120" align="right" ><img src="images/r-team/unsw/Aida_Afrooz.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong> Aida Afrooz</strong><br />
+                Technical Specialist - Urban Data, Mapping and Visualisation <br />
+                <br />
+                a.eslamiafrooz@unsw.edu.au<br />
+                <br />
+               <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/unsw/Jonathan_Doig.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Jonathan Doig</strong><br />
+                Software Engineer – Spatial Systems <br />
+                <br />
+                j.doig@unsw.edu.au<br />
+              <br /></td>
+            </tr>
+            
+          </tbody>
+        </table>
+        &nbsp;
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <table width="600" border="0">
+          <tbody>
+            <tr>
+              <td width="120"><a name="uq"><img src="images/uni-logos/UQ.png" width="100" /><br /><br /></a></td>
+              <td style="font-size:16px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom">Project Team at The University of Queensland <br />
+              <br /></td>
+            </tr>
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uq/JCorcoran.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Jonathan Corcoran</strong> (Chief Investigator)<br />
+                Director of Queensland Centre for Population Research School of Geography, Planning and Environmental Management The University of Queensland <br />
+                <br />
+                jj.corcoran@uq.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uq/Jane_Hunter_small.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Jane Hunter</strong> (Chief Investigator)<br />
+                Director of the eResearch Lab School of Information Technology and Electrical Engineering <br />
+                <br />
+                j.hunter@uq.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uq/Guohun_Zhu.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Tony Zhu </strong><br />
+                Post-doc / Software engineer School of Information Technology and Electrical Engineering <br />
+                <br />
+                g.zhu@uq.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uq/Tung-Kai_Shyy.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Tung-Kai (Paul) Shyy </strong><br />
+                Research Fellow - Urban Data Analyst <br />
+                School of Information Technology and Electrical Engineering <br />
+                <br />
+                t.shyy@uq.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uq/Salvatore_Flavio.png" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Salvatore Flavio Pileggi</strong><br />
+                Research Fellow - Data Semantics and Analytics <br />
+                School of Information Technology and Electrical Engineering The University of Queensland <br />
+                <br />
+                s.pileggi@uq.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+          </tbody>
+        </table>
+        &nbsp;
+        <p>&nbsp;</p>
+        
+        <p>&nbsp;&nbsp;</p>
+        
+        <table width="600" border="0">
+          <tbody>
+            <tr>
+              <td width="120"><a name="canberra"><img src="images/uni-logos/University_of_Canberra.svg.png" width="100" /><br /><br /><br /></a></td>
+              <td style="font-size:16px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom">Project Team at The University of Canberra <br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uc/Robert_Tanton.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Robert Tanton</strong> (Chief Investigator)<br />
+                National Centre for Social and Economic Modelling <br />
+                <br />
+                robert.tanton@canberra.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uc/B_Norman.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Barbara Norman</strong> (Chief Investigator)<br />
+                Director of Canberra Urban and Regional Futures (CURF) Foundation Chair of Urban and Regional Planning <br />
+                <br />
+                barbara.norman@canberra.edu.au<br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uc/Yogi_Vidyattama.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Yogi Vidyattama</strong><br />
+                Senior Research Fellow - National Centre for Social and Economic Modelling <br />
+                <br />
+                yogi.vidyattama@canberra.edu.au<br />
+                <br />
+                <br />
+              <br /></td>
+            </tr>
+            
+          </tbody>
+        </table>
+        &nbsp;
+        <p>&nbsp;</p>
+<p>&nbsp;</p>
+        <table width="600" border="0">
+          <tbody>
+            <tr>
+              <td width="120"><a name="uwa"><img src="images/uni-logos/UWA_Logo.png" width="100" /><br /><br /><br /></a></td>
+              <td style="font-size:16px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom">Project Team at The University of Western Australia <br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uwa/Sharon.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Sharon Biermann </strong> (Chief Investigator)<br />
+Director of Planning and Transport Research Centre (PATREC) School of Earth and Environment <br />
+<br />
+sharon.biermann@uwa.edu.au<br />
+<br />
+<br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uwa/ChaoSun.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Chao Sun</strong><br />
+Research Fellow School of Earth and Environment <br />
+<br />
+chao.sun@uwa.edu.au<br />
+<br />
+<br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/uwa/Gary_McCarney.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Gary McCarney</strong><br />
+                Honorary Research Fellow School of Earth and Environment <br />
+                <br />
+                gary.mccarney@uwa.edu.au<br />
+                <br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            
+          </tbody>
+        </table>
+        &nbsp;
+        
+        <p>&nbsp;</p>
+<p>&nbsp;</p>
+        <table width="600" border="0">
+          <tbody>
+            <tr>
+              <td width="120"><a name="uow"><img src="images/uni-logos/UOWol.png" width="100" /><br /><br /><br /></a></td>
+              <td style="font-size:16px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom">Project Team at The University of Wollongong<br />
+                &nbsp;<br />
+              <br /></td>
+            </tr>
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/UoWol/Pascal_Perez.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Professor Pascal Perez </strong>(Chief Investigator)<br />
+                                Director of SMART Infrastructure Facility <br />
+                <br />
+                pascal_perez@uow.edu.au<br />
+                <br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            
+            <tr>
+              <td width="120" align="right" ><img src="images/r-team/UoWol/Jun_Ma.jpg" width="80" style="margin-right: 10px;box-shadow:10px 10px 10px -10px #cccccc;" /><br /><br /><br /><br /></td>
+              <td style="font-size:12px; font-family:'Gill Sans', 'Gill Sans MT', 'Myriad Pro', 'DejaVu Sans Condensed', Helvetica, Arial, sans-serif;" valign="bottom"><br />
+                <strong>Dr Jun Ma</strong><br />
+                Research Fellow - SMART Infrastructure Facility <br />
+                <br />
+                jun_ma@uow.edu.au<br />
+                <br />
+                <br />
+              <br /></td>
+            </tr>
+            
+            
+            
+            
+            
+          </tbody>
+        </table>
+        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      <!-- end post -->
+    </div>
+    <!-- end recent posts -->
+  </div>
+  
+
+
+
+  <!-- BEGIN sidebar -->
+  <div id="sidebar">
+  <!-- begin tag cloud -->
+    <div class="box">
+      <h2>Tag Cloud</h2>
+      <div class="tags"></div>
+    <img src="images/tagcloudexample.PNG" width="310" height="176" alt=""/>
+    </div>
+    <!-- end tag cloud -->
+    
+    <!-- begin popular posts -->
+        <div class="box" id="mostVisitedBox">
+      
+      
+    </div>
+    
+     <!-- begin categories -->
+      <div class="box" id="bbithemes">
+        
+      </div>
+      <!-- end categories -->
+      
+      <!-- begin sponsors -->
+    <div class="box">
+      
+      <ul class="bookmarks">
+        
+        <li class="twt"><a href="#">Follow us on Twitter</a></li>
+        <li class="fcb"><a href="https://www.facebook.com/Urban-Analytics-Infrastructure-1983766481858163/" target="_blank">Follow us on Facebook</a></li>
+      </ul>
+    </div>
+    <!-- end sponsors -->
+    
+      
+    <!-- end popular posts -->
+    <!-- begin flickr images -->
+    <div class="box">
+      <h2>PROJECT PARTNERS</h2>
+      <div class="flickr" style="height: 280px;">
+        <div style="float:left"><img src="images/uni-logos/arc_stacked.png" width="50" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/uom-logo.png" width="60" alt="" style="padding: 5px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UNSW_coat_of_arms.png" width="60" alt="" style="padding: 5px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UQ.png" width="60" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UOWol.png" width="60" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/University_of_Canberra.svg.png" width="60" alt="" style="padding: 10px;"/></div>
+        <div style="float:left"><img src="images/uni-logos/UWA_Logo.png" width="60" alt="" style="padding: 10px;"/></div>
+      </div>
+    </div>
+    <!-- end flickr images --> 
+    
+    
+    
+  </div>
+  <!-- END sidebar -->
+  
+  
+</div>
+<!-- END wrapper -->
+
+
+
+
+
+<!-- BEGIN footer -->
+<div id="footer">
+  <p class="l">Copyright &copy; 2017 - <B>Urban Analytics  Infrastructure (Beta version) </B> &middot; All Rights Reserved.</p>
+</div>
+<!-- END footer -->
+</body>
+</html>
