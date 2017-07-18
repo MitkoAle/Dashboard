@@ -251,7 +251,25 @@ display: block !important;
         map1.getTargetElement().style.cursor = hit ? 'pointer' : '';
       });
 
-	  
+	  map1.getView().on('propertychange', function(e) {
+		   switch (e.key) {
+			  case 'resolution':
+				var zoom = map1.getView().getZoom();
+				var center = map1.getView().getCenter();
+				
+				map2.setView(new ol.View({
+					projection: 'EPSG:3857',
+					center: center, //long,lat
+					zoom: zoom
+				}));
+				map3.setView(new ol.View({
+					projection: 'EPSG:3857',
+					center: center, //long,lat
+					zoom: zoom
+				}));
+				break;
+		   }
+		});
 	  
 	  
 	  
