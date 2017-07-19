@@ -31,6 +31,11 @@ svg {
     padding: 2rem;
 }
 
+.ol-control
+{
+	min-width: 5% !important;
+}
+
 div.chart {
     position: relative;
     width: 500px;
@@ -102,24 +107,24 @@ div.chart {
   top: 5px;
 }
 
-#info{
+.info{
   position: absolute;
   z-index: 10;
   left: 5px;
   bottom: 0px;
+  width:440px;
 }
 
 iframe{
 	width:440px;
-	height:110px;
+	height:80px;
+	border-width: 1px;
+    background: white;
 }
+
 
 img{
 float:right;
-}
-
-.featureInfo{
-display: block !important;
 }
 
 </style>
@@ -139,7 +144,8 @@ display: block !important;
 		{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200){
 			var response = JSON.parse(xmlhttp.response);
-
+				
+			
 				var charts = [{"yfield":["data1","data2","data3"],"stacked":true,"title":"Bua_commercial_sa1","yfieldtitle":["City of Melbourne",
 				"City of Moreland","City of Whitehorse"],"xfield":"month","data":[{"data1":180,"month":"","data2":0,"data3":0},
 				{"data1":0,"month":"","data2":3,"data3":0},{"data1":0,"month":"","data2":0,"data3":10}],"type":"columnchart","seqnum":4},{"yfield":["data1","data2","data3"],"stacked":true,"title":"FAR_sa1","yfieldtitle":["City of Melbourne",
@@ -167,269 +173,172 @@ display: block !important;
 </script>
   <body>
   <div id="container">
-    <div id="map1" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_bua_commercial_sa1"></img></div>
-    <div id="info" style="width:440px">&nbsp;</div>
+    <div id="map0" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_bua_commercial_sa1"></img></div>
+    <div id="info0" class="info">&nbsp;</div>
   </div>
 	</div>
   <div id="container">
-	<div id="map2" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_far_sa1"></img></div></div>
+	<div id="map1" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_far_sa1"></img></div>
+	<div id="info1" class="info">&nbsp;</div>
+	  </div>
 	  </div>
   <div id="container">
-	<div id="map3" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:melbourne_pga_sa1"></img></div></div>
-	  </div>
+	<div id="map2" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:melbourne_pga_sa1"></img></div>
+	<div id="info2" class="info">&nbsp;</div>	
+	</div>
+	</div>
   <div id="container">
 	<div id="chart0"></div>
   </div>
   <div id="container">
-	<div id="map4" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_bua_commercial_sa1"></img></div></div>
+	<div id="map3" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_bua_commercial_sa1"></img></div>
+	<div id="info3" class="info">&nbsp;</div></div>
 	  </div>
   <div id="container">
-	<div id="map5" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_far_sa1"></img></div></div>
+	<div id="map4" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_far_sa1"></img></div>
+	<div id="info4" class="info">&nbsp;</div></div>
 	</div>
   <div id="container">
-	<div id="map6" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:melbourne_pga_sa1"></img></div></div>
+	<div id="map5" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:melbourne_pga_sa1"></img></div>
+	<div id="info5" class="info">&nbsp;</div></div>
   </div>
   <div id="container">
 	<div id="chart1"></div>
   </div>
   <div id="container">
-	<div id="map7" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_bua_commercial_sa1"></img></div></div>
+	<div id="map6" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_bua_commercial_sa1"></img></div>
+	<div id="info6" class="info">&nbsp;</div></div>
   </div>
   <div id="container">
-	<div id="map8" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_far_sa1"></img></div></div>
+	<div id="map7" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:whitehorse_far_sa1"></img></div>
+	<div id="info7" class="info">&nbsp;</div></div>
   </div>
   <div id="container">
-	<div id="map9" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:melbourne_pga_sa1"></img></div></div>
+	<div id="map8" class="map"><div id="legend"><img src="http://144.6.224.184:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=uadi-ws-uom:melbourne_pga_sa1"></img></div>
+	<div id="info8" class="info">&nbsp;</div></div>
   </div>
   <div id="container">
 	<div id="chart2"></div>
   </div>
     <script>
-var wmsSource = new ol.source.TileWMS({
-        url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-        params: {'LAYERS': 'uadi-ws-uom:melbourne_bua_commercial_sa1', 'TILED': true},
-        serverType: 'geoserver'
-      });
-	  var layer1 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-			source: wmsSource
-        })
-      ];
-	  var view = new ol.View({
-          center: [16135548, -4553599],
-          zoom: 12
-      });
-      var map1 = new ol.Map({
-        layers: layer1,
-        target: 'map1',
-        view: view
-      });
-	  
-	  map1.on('singleclick', function(evt) {
-        document.getElementById('info').innerHTML = '';
-        var viewResolution = /** @type {number} */ (view.getResolution());
-        var url = wmsSource.getGetFeatureInfoUrl(
-            evt.coordinate, viewResolution, 'EPSG:3857',
-            {'INFO_FORMAT': 'text/html'});
-        if (url) {
-          document.getElementById('info').innerHTML = '<iframe seamless src="' + url + '"></iframe>';
-        }
-      });
-
-      map1.on('pointermove', function(evt) {
-        if (evt.dragging) {
-          return;
-        }
-        var pixel = map1.getEventPixel(evt.originalEvent);
-        var hit = map1.forEachLayerAtPixel(pixel, function() {
-          return true;
-        });
-        map1.getTargetElement().style.cursor = hit ? 'pointer' : '';
-      });
-
-	  map1.getView().on('propertychange', function(e) {
-		   switch (e.key) {
-			  case 'resolution':
-				var zoom = map1.getView().getZoom();
-				var center = map1.getView().getCenter();
-				
-				map2.setView(new ol.View({
-					projection: 'EPSG:3857',
-					center: center, //long,lat
-					zoom: zoom
-				}));
-				map3.setView(new ol.View({
-					projection: 'EPSG:3857',
-					center: center, //long,lat
-					zoom: zoom
-				}));
-				break;
-		   }
+	class map {
+	  constructor(name, mapId, center, zoom) {
+		this.wmsSource = new ol.source.TileWMS({
+			url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
+			params: {'LAYERS': name, 'TILED': true},
+			serverType: 'geoserver'
 		});
-	    var layer2 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:melbourne_far_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map2 = new ol.Map({
-        layers: layer2,
-        target: 'map2',
-        view: new ol.View({
-          center: [16135548, -4553599],
-          zoom: 12
-        })
-      });
-	      var layer3 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:melbourne_pga_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map3 = new ol.Map({
-        layers: layer3,
-        target: 'map3',
-        view: new ol.View({
-          center: [16135548, -4553599],
-          zoom: 12
-        })
-      });
-	  	  	var layer4 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:moreland_bua_commercial_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map4 = new ol.Map({
-        layers: layer4,
-        target: 'map4',
-        view: new ol.View({
-          center: [16135548, -4541299],
-          zoom: 12
-        })
-      });
-	  	  	var layer5 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:moreland_far_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map5 = new ol.Map({
-        layers: layer5,
-        target: 'map5',
-        view: new ol.View({
-          center: [16135548, -4541299],
-          zoom: 12
-        })
-      });
-	  	var layer6 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:moreland_pga_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map6 = new ol.Map({
-        layers: layer6,
-        target: 'map6',
-        view: new ol.View({
-          center: [16135548, -4541299],
-          zoom: 12
-        })
-      });
-	  	var layer7 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:whitehorse_bua_commercial_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map7 = new ol.Map({
-        layers: layer7,
-        target: 'map7',
-        view: new ol.View({
-          center: [16159548, -4555500],
-          zoom: 12
-        })
-      });
-	  	  	var layer8 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:whitehorse_far_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map8 = new ol.Map({
-        layers: layer8,
-        target: 'map8',
-        view: new ol.View({
-          center: [16159548, -4555500],
-          zoom: 12
-        })
-      });
-	  	var layer9 = [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://144.6.224.184:8080/geoserver/uadi-ws-uom/wms',
-            params: {'LAYERS': 'uadi-ws-uom:whitehorse_pga_sa1', 'TILED': true},
-            serverType: 'geoserver'
-          })
-        })
-      ];
-      var map9 = new ol.Map({
-        layers: layer9,
-        target: 'map9',
-        view: new ol.View({
-          center: [16159548, -4555500],
-          zoom: 12
-        })
-      });
-
+		this.layer = [
+			new ol.layer.Tile({
+			  source: new ol.source.OSM()
+			}),
+			new ol.layer.Tile({
+				source: this.wmsSource
+			})
+		];
+		this.view = new ol.View({
+			center: center,
+			zoom: zoom
+		});
+		this.map = new ol.Map({
+			layers: this.layer,
+			target: mapId,
+			view: this.view
+		});
+	  }
+	}
+	
+	var layersNames = ["uadi-ws-uom:melbourne_bua_commercial_sa1","uadi-ws-uom:melbourne_far_sa1","uadi-ws-uom:melbourne_pga_sa1",
+	"uadi-ws-uom:moreland_bua_commercial_sa1","uadi-ws-uom:moreland_far_sa1","uadi-ws-uom:moreland_pga_sa1",
+	"uadi-ws-uom:whitehorse_bua_commercial_sa1","uadi-ws-uom:whitehorse_far_sa1","uadi-ws-uom:whitehorse_pga_sa1"];
+	
+	var center = [[16135548, -4553599],[16135548, -4541299],[16159548, -4555500]];
+	var zoom = 12;
+	
+	var maps = [];
+	for (var i = 0; i < 9; ++i) {
+		maps.push("map"+i.toString());
+	}
+		
+	var map1 = new map(layersNames[0],maps[0],center[0],zoom);
+	var map2 = new map(layersNames[1],maps[1],center[0],zoom);
+	var map3 = new map(layersNames[2],maps[2],center[0],zoom);
+	var map4 = new map(layersNames[3],maps[3],center[1],zoom);
+	var map5 = new map(layersNames[4],maps[4],center[1],zoom);
+	var map6 = new map(layersNames[5],maps[5],center[1],zoom);
+	var map7 = new map(layersNames[6],maps[6],center[2],zoom);
+	var map8 = new map(layersNames[7],maps[7],center[2],zoom);
+	var map9 = new map(layersNames[8],maps[8],center[2],zoom);
+  
+	var mapFollow = function(mapA, mapB, mapC) {
+		var syncMapHandler = function() {
+			var zoom = mapA.getView().getZoom();
+			var center = mapA.getView().getCenter();
+			mapB.setView(new ol.View({
+				projection: 'EPSG:3857',
+				center: center, //long,lat
+				zoom: zoom
+			}));
+			mapC.setView(new ol.View({
+				projection: 'EPSG:3857',
+				center: center, //long,lat
+				zoom: zoom
+			}));
+		};
+		var syncMapClick = function(evt) {
+			var viewResolution = (mapA.getView().getResolution());
+			var url = mapA.getLayers().getArray()[1].getSource().getGetFeatureInfoUrl(
+				evt.coordinate, viewResolution, 'EPSG:3857',
+				{'INFO_FORMAT': 'text/html',
+				'propertyName': 'objectid,bua_nom'});
+			if (url) {		
+				var info = "info" + mapA.getTarget().substring(3);
+				document.getElementById(info).innerHTML = '<iframe seamless src="' + url + '"></iframe>';
+			}
+			var url = mapB.getLayers().getArray()[1].getSource().getGetFeatureInfoUrl(
+				evt.coordinate, viewResolution, 'EPSG:3857',
+				{'INFO_FORMAT': 'text/html',
+				'propertyName': 'objectid,bua_nom'});
+			if (url) {		
+				var info = "info" + mapB.getTarget().substring(3);
+				document.getElementById(info).innerHTML = '<iframe seamless src="' + url + '"></iframe>';
+			}
+			var url = mapC.getLayers().getArray()[1].getSource().getGetFeatureInfoUrl(
+				evt.coordinate, viewResolution, 'EPSG:3857',
+				{'INFO_FORMAT': 'text/html',
+				'propertyName': 'objectid,bua_nom'});
+			if (url) {		
+				var info = "info" + mapC.getTarget().substring(3);
+				document.getElementById(info).innerHTML = '<iframe seamless src="' + url + '"></iframe>';
+			}
+		};
+		var syncMapPointer = function(evt) {
+			if (evt.dragging) {
+				  return;
+				}
+				var pixel = mapA.getEventPixel(evt.originalEvent);
+				var hit = mapA.forEachLayerAtPixel(pixel, function() {
+				  return true;
+				});
+				mapA.getTargetElement().style.cursor = hit ? 'pointer' : '';
+				mapB.getTargetElement().style.cursor = hit ? 'pointer' : '';
+				mapC.getTargetElement().style.cursor = hit ? 'pointer' : '';
+		}
+		
+		mapA.on('moveend', syncMapHandler);
+		mapA.on('click', syncMapClick);
+		mapA.on('pointermove', syncMapPointer)
+	};
+	
+	mapFollow(map1.map, map2.map, map3.map);
+    mapFollow(map2.map, map1.map, map3.map);
+	mapFollow(map3.map, map1.map, map2.map);
+	mapFollow(map4.map, map5.map, map6.map);
+    mapFollow(map5.map, map4.map, map6.map);
+	mapFollow(map6.map, map4.map, map5.map);
+	mapFollow(map7.map, map8.map, map9.map);
+    mapFollow(map8.map, map7.map, map9.map);
+	mapFollow(map9.map, map7.map, map8.map);
     </script>
   </body>
 </html>
